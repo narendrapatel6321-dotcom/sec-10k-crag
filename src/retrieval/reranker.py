@@ -6,17 +6,26 @@ and re-rank the documents retrieved by the hybrid search pipeline, drastically
 improving the precision of the context window.
 """
 
-from typing import List
+from typing import List, Optional
+import torch
 from langchain_core.documents import Document
 from sentence_transformers import CrossEncoder
 
-def get_reranker_model(model_name: str = "BAAI/bge-reranker-v2-m3", device: str = "cuda") -> CrossEncoder:
+
+def get_reranker_model(
+    model_name: str = "BAAI/bge-reranker-v2-m3",
+    device: Optional[str] = None
+) -> CrossEncoder:
     """
     Loads and returns the cross-encoder reranking model.
-    Defaults to the GPU for Colab execution.
+    Dynamically falls back to CPU if a GPU (CUDA) is not available.
     """
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
     print(f"Loading Reranker: {model_name} on {device}...")
     return CrossEncoder(model_name, device=device)
+
 
 def rerank_documents(
     query: str,
@@ -42,18 +51,18 @@ def rerank_documents(
     """
     if not documents:
         return []
-        
+
     # Format input for the cross-encoder: List of [query, text] pairs
     pairs = [[query, doc.page_content] for doc in documents]
-    
+
     # Generate relevance scores
     scores = reranker.predict(pairs)
-    
+
     # Pair documents with their scores and sort descending
     doc_score_pairs = list(zip(documents, scores))
     doc_score_pairs.sort(key=lambda x: x[1], reverse=True)
-    
+
     # Extract and return the top_k sorted documents
     best_docs = [doc for doc, score in doc_score_pairs[:top_k]]
-    
+
     return best_docs
