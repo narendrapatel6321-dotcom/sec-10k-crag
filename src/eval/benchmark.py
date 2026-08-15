@@ -83,6 +83,30 @@ DEFAULT_BENCHMARK_CASES = [
         "expected_section": None,
         "expected_numbers": [],
         "type": "out_of_scope"
+    },
+    {
+        # NOTE: fill in a real figure pulled from the target filing's XBRL income
+        # statement (e.g. total revenue for the most recent fiscal year) before
+        # running this case for real. Left as a clearly-labeled placeholder here
+        # since the actual value depends on which filing snapshot is indexed.
+        "id": "TC-06",
+        "question": "What was Apple's total net sales for the most recent fiscal year in the filing?",
+        "expected_ticker": "AAPL",
+        "expected_category": "sec_filing",
+        "expected_section": "mdna",
+        "expected_numbers": [391035],  # REPLACE with the real XBRL ground-truth figure (millions USD)
+        "type": "quantitative_mdna"
+    },
+    {
+        # Same caveat as TC-06 — replace with the real CET1 ratio disclosed in
+        # Citigroup's indexed 10-K before treating this as a passing benchmark.
+        "id": "TC-07",
+        "question": "What was Citigroup's Common Equity Tier 1 (CET1) capital ratio disclosed in the filing?",
+        "expected_ticker": "C",
+        "expected_category": "sec_filing",
+        "expected_section": "mdna",
+        "expected_numbers": [13.4],  # REPLACE with the real XBRL/filing ground-truth figure (%)
+        "type": "quantitative_mdna"
     }
 ]
 
@@ -176,6 +200,8 @@ def run_benchmark(
             "documents": [],
             "generation": "",
             "verification_feedback": "",
+            "rewrite_count": 0,
+            "verify_count": 0,
             "retry_count": 0
         }
 
@@ -214,7 +240,8 @@ def run_benchmark(
             "is_faithful": judge_result.is_faithful,
             "judge_reasoning": judge_result.reasoning,
             "latency_seconds": latency,
-            "retries": final_state.get("retry_count", 0),
+            "rewrite_retries": final_state.get("rewrite_count", 0),
+            "verify_retries": final_state.get("verify_count", 0),
             "generation": generation
         }
 
