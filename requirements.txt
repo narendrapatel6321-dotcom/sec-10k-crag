@@ -9,6 +9,7 @@ edgartools>=2.20.0
 # LLM Orchestration (LangChain & LangGraph)
 langchain>=0.1.0
 langchain-core>=0.1.30
+langchain-classic
 langchain-community>=0.0.29
 langchain-text-splitters>=0.0.1
 langgraph>=0.0.30
