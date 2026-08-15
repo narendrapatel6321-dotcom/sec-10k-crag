@@ -51,7 +51,7 @@ def retrieve(state: AgentState) -> Dict[str, Any]:
         
     # In a production environment, you might load this once globally or pass via config
     retriever = get_hybrid_retriever(index_dir="./data/index", top_k=15, search_kwargs=search_kwargs)
-    reranker = get_reranker_model(device="cuda")
+    reranker = get_reranker_model()
     
     # 1. Hybrid Search
     initial_docs = retriever.invoke(question)
