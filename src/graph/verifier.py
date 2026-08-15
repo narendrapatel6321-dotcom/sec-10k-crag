@@ -27,18 +27,26 @@ def load_xbrl_tables(ticker: str, accession: str, xbrl_dir: str | Path) -> dict[
     return tables
 
 def extract_numbers_from_text(text: str) -> List[float]:
-    """Extracts raw numerical values from a text string, handling commas and decimals."""
-    # Matches numbers like 1,000.50 or 5000000
-    pattern = r'\b\d{1,3}(?:,\d{3})*(?:\.\d+)?\b|\b\d+(?:\.\d+)?\b'
+    """Extracts raw numerical values from a text string, handling commas, decimals,
+    and accounting-style parenthesized negatives (e.g. "(1,234)" -> -1234.0)."""
+    # Matches an optional wrapping "(" ... ")" around a number like 1,000.50 or 5000000
+    pattern = r'(\()?\b(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)\b(\))?'
     matches = re.findall(pattern, text)
-    
+
     numbers = []
-    for match in matches:
-        clean_num = match.replace(',', '')
+    for open_paren, raw_num, close_paren in matches:
+        clean_num = raw_num.replace(',', '')
         try:
-            numbers.append(float(clean_num))
+            value = float(clean_num)
         except ValueError:
             continue
+        # Financial statements commonly denote negative figures as "(1,234)"
+        # rather than "-1234". The original implementation dropped the sign
+        # entirely, which could let a real loss silently "match" an unrelated
+        # positive ground-truth value.
+        if open_paren and close_paren:
+            value = -value
+        numbers.append(value)
     return numbers
 
 def verify_numbers(
@@ -76,8 +84,12 @@ def verify_numbers(
     failed_numbers = []
     
     for gen_num in generated_numbers:
-        # Skip small integers (e.g., years or bullet points) that might trigger false positives
-        if gen_num < 3000 and gen_num.is_integer():
+        # Skip plausible calendar years (e.g. "in fiscal 2024") so they aren't checked
+        # against financial figures. The previous check ("< 3000 and is_integer()")
+        # also caught real whole-dollar figures under 3000 — which is common for
+        # mega-cap filings reported in billions (e.g. "$45 billion" -> 45.0).
+        # Restricting to a 4-digit year range avoids discarding legitimate values.
+        if gen_num.is_integer() and 1990 <= gen_num <= 2035:
             continue
             
         # Check if the generated number exists within the tolerance of ANY ground truth number
