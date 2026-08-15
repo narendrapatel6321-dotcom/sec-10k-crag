@@ -12,6 +12,9 @@ from src.graph.state import AgentState
 from src.graph.nodes import retrieve, grade_documents, generate, verify, rewrite_query
 from src.retrieval.router import get_query_router
 
+from src.graph.nodes import llm
+from langchain_core.messages import HumanMessage
+
 # Initialize the Groq-powered query router
 route_query_func = get_query_router()
 
@@ -68,16 +71,14 @@ def check_verification(state: AgentState) -> Literal["END", "generate"]:
 # --- Out of Scope / General Finance Fallback Node ---
 
 def out_of_scope_generation(state: AgentState) -> dict:
-    """Handles general finance questions or completely unrelated queries without RAG."""
-    from src.graph.nodes import llm
-    from langchain_core.messages import HumanMessage
-    
-    prompt = f"The user asked: '{state['question']}'. Respond directly. If it is completely unrelated to finance or tech, politely decline to answer."
+    prompt = (
+        f"The user asked: '{state['question']}'. "
+        "You are an SEC 10-K financial analysis assistant. Politely decline "
+        "to answer any questions unrelated to finance, corporate disclosures, or SEC filings."
+    )
     response = llm.invoke([HumanMessage(content=prompt)])
+    return {"generation": response.content, "verification_feedback": "Passed (No RAG)."} 
     
-    return {"generation": response.content, "verification_feedback": "Passed (No RAG)."}
-
-
 # --- Graph Construction ---
 
 def build_graph() -> StateGraph:
