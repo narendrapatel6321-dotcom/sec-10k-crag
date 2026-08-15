@@ -6,6 +6,7 @@ It configures and returns an EnsembleRetriever for hybrid (dense + sparse) searc
 combining semantic search and keyword matching.
 """
 
+import torch
 import pickle
 from pathlib import Path
 from typing import Optional
@@ -48,10 +49,13 @@ def get_hybrid_retriever(
     if not index_path.exists():
         raise FileNotFoundError(f"Index directory not found at: {index_path}")
 
-    # 1. Initialize Dense Retriever (ChromaDB)
+    # 1. Initialize Dense Retriever (ChromaDB) dynamically
+    # Automatically uses GPU if available, otherwise falls back to CPU (essential for Streamlit Cloud)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    
     embeddings = HuggingFaceEmbeddings(
         model_name="BAAI/bge-small-en-v1.5",
-        model_kwargs={"device": "cuda"},
+        model_kwargs={"device": device},
         encode_kwargs={"normalize_embeddings": True}
     )
     
