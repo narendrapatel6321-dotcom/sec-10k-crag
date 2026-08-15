@@ -31,5 +31,5 @@ transformers
 
 langchain-groq
 langchain-pinecone
-pinecone-client
+pinecone
 
