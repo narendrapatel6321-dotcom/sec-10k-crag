@@ -23,3 +23,7 @@ chromadb>=0.4.24
 
 # Schemas
 pydantic>=2.6.0
+
+torch
+torchvision
+transformers
