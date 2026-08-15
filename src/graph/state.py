@@ -29,4 +29,10 @@ class AgentState(TypedDict):
     verification_feedback: str
     
     # Orchestration Tracking
-    retry_count: int
+    # NOTE: kept separate so the query-rewrite loop (grading-driven) and the
+    # numeric-correction loop (verification-driven) don't share one budget —
+    # a query that needs 2 rewrites shouldn't leave verification with only
+    # one shot left before check_verification force-halts.
+    rewrite_count: int
+    verify_count: int
+    retry_count: int  # retained for backwards compatibility / total-attempts logging
