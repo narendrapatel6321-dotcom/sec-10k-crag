@@ -1,0 +1,25 @@
+# Web Framework & Data
+streamlit>=1.30.0
+pandas>=2.0.0
+
+# SEC Ingestion Tools
+sec-edgar-downloader>=4.3.0
+edgartools>=2.20.0
+
+# LLM Orchestration (LangChain & LangGraph)
+langchain>=0.1.0
+langchain-core>=0.1.30
+langchain-community>=0.0.29
+langchain-text-splitters>=0.0.1
+langgraph>=0.0.30
+langchain-groq>=0.1.0
+
+# Retrieval & Vector Store
+langchain-chroma>=0.1.0
+langchain-huggingface>=0.0.1
+sentence-transformers>=2.5.0
+rank_bm25>=0.2.2
+chromadb>=0.4.24
+
+# Schemas
+pydantic>=2.6.0
