@@ -28,3 +28,8 @@ pydantic>=2.6.0
 torch
 torchvision
 transformers
+
+langchain-groq
+langchain-pinecone
+pinecone-client
+
